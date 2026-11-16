@@ -1,7 +1,7 @@
 // Service worker do app Falas Cruzadas: rede primeiro (diálogo novo aparece assim
 // que é publicado) e cópia em cache para abrir sem internet. O conteúdo continua
 // cifrado no cache; a chave fica só no aparelho (localStorage).
-const CACHE = "falas-v1";
+const CACHE = "falas-v2";
 const ARQUIVOS = [
   "./",
   "./index.html",
@@ -27,8 +27,11 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
+  // cache: "no-cache" faz o navegador perguntar ao servidor se mudou, em vez de usar a copia
+  // de ate 10 min que o GitHub Pages permite (max-age=600); sem isso o app instalado abria
+  // a versao velha logo depois de publicar.
   e.respondWith(
-    fetch(req)
+    fetch(req, { cache: "no-cache" })
       .then((resp) => {
         if (resp.ok) {
           const copia = resp.clone();
